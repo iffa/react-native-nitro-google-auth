@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "example",
+    "slug": "example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "platforms": ["ios", "android"],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "dev.iffa.googleauthexample",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "dev.iffa.googleauthexample",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "plugins": [
+      [
+        "react-native-nitro-google-auth",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.725900148453-ih6etjmooe7p8q465379bq9ute0si6v0"
+        }
+      ]
+    ]
+  }
+}

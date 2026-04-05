@@ -1,0 +1,109 @@
+{
+  "name": "react-native-nitro-google-auth",
+  "version": "0.1.0",
+  "description": "Sign in with Google for React Native, built with Nitro",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./app.plugin.js": "./app.plugin.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "git clean -dfX",
+    "build:plugin": "tsc -p plugin/tsconfig.json",
+    "build": "npm run build:plugin && npm run typecheck && bob build",
+    "codegen": "nitrogen --logLevel=\"debug\" && npm run build && node post-script.js",
+    "prepublishOnly": "cp ../../README.md ../../LICENSE ."
+  },
+  "keywords": [
+    "react-native",
+    "react-native-nitro-google-auth",
+    "google-auth",
+    "google"
+  ],
+  "files": [
+    "src",
+    "react-native.config.js",
+    "lib",
+    "nitrogen",
+    "cpp",
+    "nitro.json",
+    "android/build.gradle",
+    "android/fix-prefab.gradle",
+    "android/gradle.properties",
+    "android/CMakeLists.txt",
+    "android/src",
+    "ios/**/*.h",
+    "ios/**/*.m",
+    "ios/**/*.mm",
+    "ios/**/*.cpp",
+    "ios/**/*.swift",
+    "app.plugin.js",
+    "plugin/build",
+    "expo",
+    "expo-module.config.json",
+    "*.podspec",
+    "README.md",
+    "LICENSE"
+  ],
+  "workspaces": [
+    "example"
+  ],
+  "repository": "https://github.com/iffa/react-native-nitro-google-auth.git",
+  "author": "Santeri Elo",
+  "license": "MIT",
+  "bugs": "https://github.com/iffa/react-native-nitro-google-auth/issues",
+  "homepage": "https://github.com/iffa/react-native-nitro-google-auth#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.12.2",
+    "@types/react": "19.2.14",
+    "@expo/config-plugins": "^55.0.7",
+    "@expo/config-types": "^55.0.5",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "expo-module-scripts": "^55.0.2",
+    "expo-modules-core": "^55.0.20",
+    "nitrogen": "0.35.3",
+    "react": "19.2.3",
+    "react-native": "0.84.1",
+    "react-native-builder-bob": "^0.41.0",
+    "react-native-nitro-modules": "0.35.3",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-nitro-modules": "*",
+    "expo": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo": {
+      "optional": true
+    }
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.json",
+          "tsc": "../../node_modules/typescript/bin/tsc"
+        }
+      ]
+    ]
+  }
+}
