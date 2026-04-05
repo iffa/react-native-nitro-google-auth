@@ -8,6 +8,6 @@
     "build": "bun run --filter react-native-nitro-google-auth build"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }
