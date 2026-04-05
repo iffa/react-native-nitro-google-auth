@@ -1,0 +1,7 @@
+{
+  "platforms": ["ios"],
+  "ios": {
+    "appDelegateSubscribers": ["GoogleAuthAppDelegate"],
+    "podspecPath": "expo/ios/ExpoAdapterGoogleAuth.podspec"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "bun run --filter react-native-nitro-google-auth build"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

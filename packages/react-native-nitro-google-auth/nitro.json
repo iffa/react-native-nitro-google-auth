@@ -1,0 +1,24 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["googleauth"],
+  "ios": {
+    "iosModuleName": "GoogleAuth"
+  },
+  "android": {
+    "androidNamespace": ["googleauth"],
+    "androidCxxLibName": "GoogleAuth"
+  },
+  "autolinking": {
+    "GoogleAuth": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridGoogleAuth"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridGoogleAuth"
+      }
+    }
+  },
+  "ignorePaths": ["**/node_modules"]
+}
