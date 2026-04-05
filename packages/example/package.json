@@ -12,7 +12,7 @@
   "dependencies": {
     "expo": "^55.0.11",
     "expo-status-bar": "~55.0.5",
-    "react": "19.2.0",
+    "react": "19.2.4",
     "react-native": "0.83.4",
     "react-native-nitro-google-auth": "workspace:*",
     "react-native-nitro-modules": "0.35.3",
