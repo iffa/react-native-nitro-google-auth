@@ -15,44 +15,21 @@ export type GoogleAuthConfigPluginOptions = {
   iosUrlScheme: string;
 };
 
-const MESSAGE_PREFIX = "react-native-nitro-google-auth";
-
-function validateOptions(
-  options: GoogleAuthConfigPluginOptions | void,
-): GoogleAuthConfigPluginOptions {
-  const iosUrlScheme = options?.iosUrlScheme?.trim();
-  if (!iosUrlScheme) {
-    throw new Error(
-      `${MESSAGE_PREFIX}: Missing \`iosUrlScheme\` in plugin options: ${JSON.stringify(options)}`,
-    );
-  }
-
-  if (typeof iosUrlScheme !== "string") {
-    throw new Error(
-      `${MESSAGE_PREFIX}: \`iosUrlScheme\` must be a string: ${iosUrlScheme}`,
-    );
-  }
-
-  if (!iosUrlScheme.startsWith("com.googleusercontent.apps.")) {
-    throw new Error(
-      `${MESSAGE_PREFIX}: \`iosUrlScheme\` must start with "com.googleusercontent.apps.": ${iosUrlScheme}`,
-    );
-  }
-
-  return { iosUrlScheme };
-}
-
 const withGoogleAuth: ConfigPlugin<GoogleAuthConfigPluginOptions | void> = (
   config: ExpoConfig,
-  options,
+  options
 ) => {
-  const { iosUrlScheme } = validateOptions(options);
+  const iosUrlScheme = options?.iosUrlScheme?.trim();
 
   return withInfoPlist(config, (cfg: ExportedConfigWithProps<InfoPlist>) => {
+    if (!iosUrlScheme) {
+      return cfg;
+    }
+
     if (!IOSConfig.Scheme.hasScheme(iosUrlScheme, cfg.modResults)) {
       cfg.modResults = IOSConfig.Scheme.appendScheme(
         iosUrlScheme,
-        cfg.modResults,
+        cfg.modResults
       );
     }
     return cfg;
@@ -62,5 +39,5 @@ const withGoogleAuth: ConfigPlugin<GoogleAuthConfigPluginOptions | void> = (
 export default createRunOncePlugin<GoogleAuthConfigPluginOptions | void>(
   withGoogleAuth,
   pkg.name,
-  pkg.version,
+  pkg.version
 );
