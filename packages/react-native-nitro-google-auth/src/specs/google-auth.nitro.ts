@@ -31,6 +31,16 @@ export interface GoogleUserData {
 export interface GoogleSignInError {
   code: string;
   message: string;
+  /** Native diagnostics for Android credential provider failures. */
+  android?: GoogleSignInAndroidDiagnostics;
+}
+
+export interface GoogleSignInAndroidDiagnostics {
+  playServicesStatus: number;
+  playServicesVersion?: string;
+  nativeExceptionType: string;
+  nativeMessage?: string;
+  nativeStackTrace: string;
 }
 
 export interface GoogleSignInResult {

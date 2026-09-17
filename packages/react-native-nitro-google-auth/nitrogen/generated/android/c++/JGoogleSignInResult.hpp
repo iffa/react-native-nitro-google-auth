@@ -10,8 +10,10 @@
 #include <fbjni/fbjni.h>
 #include "GoogleSignInResult.hpp"
 
+#include "GoogleSignInAndroidDiagnostics.hpp"
 #include "GoogleSignInError.hpp"
 #include "GoogleUserData.hpp"
+#include "JGoogleSignInAndroidDiagnostics.hpp"
 #include "JGoogleSignInError.hpp"
 #include "JGoogleUserData.hpp"
 #include <optional>

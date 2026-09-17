@@ -56,7 +56,8 @@ class HybridGoogleAuth: HybridGoogleAuthSpec {
                         data: nil,
                         error: GoogleSignInError(
                             code: "CANCELLED",
-                            message: "The user canceled the sign-in flow."
+                            message: "The user canceled the sign-in flow.",
+                            android: nil
                         )
                     )
                 }

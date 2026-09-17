@@ -20,6 +20,8 @@ namespace margelo::nitro::googleauth { struct GoogleSignInResult; }
 namespace margelo::nitro::googleauth { struct GoogleUserData; }
 // Forward declaration of `GoogleSignInError` to properly resolve imports.
 namespace margelo::nitro::googleauth { struct GoogleSignInError; }
+// Forward declaration of `GoogleSignInAndroidDiagnostics` to properly resolve imports.
+namespace margelo::nitro::googleauth { struct GoogleSignInAndroidDiagnostics; }
 
 #include "GoogleAuthConfig.hpp"
 #include <string>
@@ -28,6 +30,7 @@ namespace margelo::nitro::googleauth { struct GoogleSignInError; }
 #include <NitroModules/Promise.hpp>
 #include "GoogleUserData.hpp"
 #include "GoogleSignInError.hpp"
+#include "GoogleSignInAndroidDiagnostics.hpp"
 
 #include "GoogleAuth-Swift-Cxx-Umbrella.hpp"
 

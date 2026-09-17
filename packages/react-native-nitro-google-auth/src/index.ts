@@ -6,6 +6,7 @@ export type {
   GoogleUserData,
   GoogleSignInResult,
   GoogleSignInError,
+  GoogleSignInAndroidDiagnostics,
 } from "./specs/google-auth.nitro";
 
 export const GoogleAuth =

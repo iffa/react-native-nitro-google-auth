@@ -18,8 +18,14 @@ public extension GoogleSignInError {
   /**
    * Create a new instance of `GoogleSignInError`.
    */
-  init(code: String, message: String) {
-    self.init(std.string(code), std.string(message))
+  init(code: String, message: String, android: GoogleSignInAndroidDiagnostics?) {
+    self.init(std.string(code), std.string(message), { () -> bridge.std__optional_GoogleSignInAndroidDiagnostics_ in
+      if let __unwrappedValue = android {
+        return bridge.create_std__optional_GoogleSignInAndroidDiagnostics_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -30,5 +36,10 @@ public extension GoogleSignInError {
   @inline(__always)
   var message: String {
     return String(self.__message)
+  }
+  
+  @inline(__always)
+  var android: GoogleSignInAndroidDiagnostics? {
+    return self.__android.value
   }
 }

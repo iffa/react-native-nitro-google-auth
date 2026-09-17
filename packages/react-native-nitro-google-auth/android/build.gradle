@@ -150,6 +150,9 @@ dependencies {
   implementation "androidx.credentials:credentials:${credentialsVersion}"
   implementation "androidx.credentials:credentials-play-services-auth:${credentialsVersion}"
   implementation "com.google.android.libraries.identity.googleid:googleid:${googleidVersion}"
+  implementation "com.google.android.gms:play-services-basement:18.5.0"
+
+  testImplementation "junit:junit:4.13.2"
 }
 
 if (isNewArchitectureEnabled()) {

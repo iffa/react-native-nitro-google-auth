@@ -22,7 +22,10 @@ data class GoogleSignInError(
   val code: String,
   @DoNotStrip
   @Keep
-  val message: String
+  val message: String,
+  @DoNotStrip
+  @Keep
+  val android: GoogleSignInAndroidDiagnostics?
 ) {
   /* primary constructor */
 
@@ -34,8 +37,8 @@ data class GoogleSignInError(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(code: String, message: String): GoogleSignInError {
-      return GoogleSignInError(code, message)
+    private fun fromCpp(code: String, message: String, android: GoogleSignInAndroidDiagnostics?): GoogleSignInError {
+      return GoogleSignInError(code, message, android)
     }
   }
 }

@@ -1,12 +1,12 @@
 {
   "name": "react-native-nitro-google-auth",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Sign in with Google for React Native, built with Nitro",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
+      "source": "./src/index.ts",
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },

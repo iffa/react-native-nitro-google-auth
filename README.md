@@ -47,7 +47,12 @@ GoogleAuth.configure({
 });
 
 const result = await GoogleAuth.signIn();
-// Send result.idToken to your backend.
+if (result.data) {
+  // Send result.data.idToken to your backend.
+} else if (result.error?.code !== "CANCELLED") {
+  // Show guidance based on result.error.code. Native Android diagnostics
+  // are available in result.error.android for error reporting.
+}
 
 await GoogleAuth.signOut();
 ```
@@ -102,12 +107,44 @@ Merge this with your existing `application(_:open:options:)` if you already have
   - `iosClientId?: string`
   - `webClientId?: string`
 - `GoogleAuth.signIn(): Promise<GoogleSignInResult>`
-  - `idToken: string`
-  - `providerUserId: string`
-  - `email?: string`
-  - `name?: string`
-  - `photoUrl?: string`
+  - `data?: GoogleUserData`
+    - `idToken: string`
+    - `providerUserId: string`
+    - `email?: string`
+    - `name?: string`
+    - `photoUrl?: string`
+  - `error?: GoogleSignInError`
+    - `code: string`
+    - `message: string`
+    - `android?: GoogleSignInAndroidDiagnostics`
+      - `playServicesStatus: number`, the native `ConnectionResult` status code
+      - `playServicesVersion?: string`, the installed version, if available
+      - `nativeExceptionType: string`
+      - `nativeMessage?: string`
+      - `nativeStackTrace: string`
 - `GoogleAuth.signOut(): Promise<void>`
+
+### Sign-in errors
+
+Cancellation, missing credentials, and Android provider configuration failures resolve with `result.error` and no `result.data`. Other failures reject the promise, so callers must also handle rejected promises.
+
+| Code                              | Meaning and suggested action                                                                                                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CANCELLED`                       | The user closed sign-in. No error message is needed.                                                                                                                                 |
+| `NO_CREDENTIALS`                  | No Google credentials are available. Check that the device has a Google account. Android only.                                                                                       |
+| `PLAY_SERVICES_MISSING`           | Google Play services is not installed. Offer another sign-in method.                                                                                                                 |
+| `PLAY_SERVICES_DISABLED`          | Ask the user to enable Google Play services in device settings.                                                                                                                      |
+| `PLAY_SERVICES_UPDATE_REQUIRED`   | Ask the user to update Google Play services.                                                                                                                                         |
+| `PLAY_SERVICES_UPDATING`          | Ask the user to retry after the update finishes.                                                                                                                                     |
+| `PLAY_SERVICES_INVALID`           | Google Play services failed its validity check. Offer another sign-in method.                                                                                                        |
+| `PLAY_SERVICES_UNAVAILABLE`       | Another Play services availability failure occurred. Inspect `error.android.playServicesStatus`.                                                                                     |
+| `CREDENTIAL_PROVIDER_UNAVAILABLE` | Play services passed its availability check, but Credential Manager could not use a provider. Inspect the native diagnostics and the app's merged Android manifest and dependencies. |
+
+The `PLAY_SERVICES_*` and `CREDENTIAL_PROVIDER_UNAVAILABLE` codes are Android-only. The library checks Play services after a provider configuration failure and preserves the native exception in `error.android`. It does not open settings, show alerts, or start updates. The app chooses the UI and translates its messages.
+
+AndroidX can report "no provider dependencies found" when Play services is unavailable, even when the app includes the provider dependency. This library includes `credentials-play-services-auth`. The availability check uses the provider's minimum Play services version, currently `230815045` for AndroidX Credentials `1.6.0-rc02`.
+
+Version `0.2.0` adds native bindings. Existing apps must rebuild their Android and iOS binaries before using it. An Expo OTA update alone cannot install these changes.
 
 ## Troubleshooting
 
@@ -128,3 +165,33 @@ Bootstrapped with [create-nitro-module](https://github.com/patrickkabwe/create-n
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+### Verification
+
+```bash
+bun install --frozen-lockfile
+bun run build
+bun run --filter example prebuild --platform android --no-install
+```
+
+From `packages/example/android`, run the native tests and build:
+
+```bash
+./gradlew :react-native-nitro-google-auth:testDebugUnitTest :app:assembleDebug
+```
+
+Set `ANDROID_HOME` to your Android SDK directory before running Gradle.
+
+For the iOS example, generate the native project with `bun run --filter example prebuild --platform ios --no-install`. From `packages/example/ios`, run `USE_FRAMEWORKS=static pod install`, then build `example.xcworkspace` in Xcode. Static frameworks provide the modules required by Google's Swift dependencies.
+
+After changing the Nitro spec, run `bun run --filter react-native-nitro-google-auth codegen` and commit the generated bindings.
+
+### Publishing
+
+Update the library version in `packages/react-native-nitro-google-auth/package.json`, refresh `bun.lock` with `bun install`, and complete verification. Commit and push the changes to `main`, then run:
+
+```bash
+gh workflow run release.yml --ref main
+```
+
+The manual `Release` workflow builds the library and runs `npm publish`. It publishes the version in `package.json`; it does not bump the version or create a Git tag. Check the workflow result and npm registry before announcing the release.

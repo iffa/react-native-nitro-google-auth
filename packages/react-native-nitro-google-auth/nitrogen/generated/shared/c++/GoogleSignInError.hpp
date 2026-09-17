@@ -28,9 +28,12 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-
+// Forward declaration of `GoogleSignInAndroidDiagnostics` to properly resolve imports.
+namespace margelo::nitro::googleauth { struct GoogleSignInAndroidDiagnostics; }
 
 #include <string>
+#include "GoogleSignInAndroidDiagnostics.hpp"
+#include <optional>
 
 namespace margelo::nitro::googleauth {
 
@@ -41,10 +44,11 @@ namespace margelo::nitro::googleauth {
   public:
     std::string code     SWIFT_PRIVATE;
     std::string message     SWIFT_PRIVATE;
+    std::optional<GoogleSignInAndroidDiagnostics> android     SWIFT_PRIVATE;
 
   public:
     GoogleSignInError() = default;
-    explicit GoogleSignInError(std::string code, std::string message): code(code), message(message) {}
+    explicit GoogleSignInError(std::string code, std::string message, std::optional<GoogleSignInAndroidDiagnostics> android): code(code), message(message), android(android) {}
 
   public:
     friend bool operator==(const GoogleSignInError& lhs, const GoogleSignInError& rhs) = default;
@@ -61,13 +65,15 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::googleauth::GoogleSignInError(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message")))
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message"))),
+        JSIConverter<std::optional<margelo::nitro::googleauth::GoogleSignInAndroidDiagnostics>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "android")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::googleauth::GoogleSignInError& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "code"), JSIConverter<std::string>::toJSI(runtime, arg.code));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "message"), JSIConverter<std::string>::toJSI(runtime, arg.message));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "android"), JSIConverter<std::optional<margelo::nitro::googleauth::GoogleSignInAndroidDiagnostics>>::toJSI(runtime, arg.android));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -80,6 +86,7 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::googleauth::GoogleSignInAndroidDiagnostics>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "android")))) return false;
       return true;
     }
   };

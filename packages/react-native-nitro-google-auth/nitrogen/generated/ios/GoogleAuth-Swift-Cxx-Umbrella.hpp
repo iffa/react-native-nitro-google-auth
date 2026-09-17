@@ -10,6 +10,8 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `GoogleAuthConfig` to properly resolve imports.
 namespace margelo::nitro::googleauth { struct GoogleAuthConfig; }
+// Forward declaration of `GoogleSignInAndroidDiagnostics` to properly resolve imports.
+namespace margelo::nitro::googleauth { struct GoogleSignInAndroidDiagnostics; }
 // Forward declaration of `GoogleSignInError` to properly resolve imports.
 namespace margelo::nitro::googleauth { struct GoogleSignInError; }
 // Forward declaration of `GoogleSignInResult` to properly resolve imports.
@@ -21,6 +23,7 @@ namespace margelo::nitro::googleauth { class HybridGoogleAuthSpec; }
 
 // Include C++ defined types
 #include "GoogleAuthConfig.hpp"
+#include "GoogleSignInAndroidDiagnostics.hpp"
 #include "GoogleSignInError.hpp"
 #include "GoogleSignInResult.hpp"
 #include "GoogleUserData.hpp"

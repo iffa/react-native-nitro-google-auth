@@ -10,6 +10,9 @@
 #include <fbjni/fbjni.h>
 #include "GoogleSignInError.hpp"
 
+#include "GoogleSignInAndroidDiagnostics.hpp"
+#include "JGoogleSignInAndroidDiagnostics.hpp"
+#include <optional>
 #include <string>
 
 namespace margelo::nitro::googleauth {
@@ -35,9 +38,12 @@ namespace margelo::nitro::googleauth {
       jni::local_ref<jni::JString> code = this->getFieldValue(fieldCode);
       static const auto fieldMessage = clazz->getField<jni::JString>("message");
       jni::local_ref<jni::JString> message = this->getFieldValue(fieldMessage);
+      static const auto fieldAndroid = clazz->getField<JGoogleSignInAndroidDiagnostics>("android");
+      jni::local_ref<JGoogleSignInAndroidDiagnostics> android = this->getFieldValue(fieldAndroid);
       return GoogleSignInError(
         code->toStdString(),
-        message->toStdString()
+        message->toStdString(),
+        android != nullptr ? std::make_optional(android->toCpp()) : std::nullopt
       );
     }
 
@@ -47,13 +53,14 @@ namespace margelo::nitro::googleauth {
      */
     [[maybe_unused]]
     static jni::local_ref<JGoogleSignInError::javaobject> fromCpp(const GoogleSignInError& value) {
-      using JSignature = JGoogleSignInError(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
+      using JSignature = JGoogleSignInError(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JGoogleSignInAndroidDiagnostics>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         jni::make_jstring(value.code),
-        jni::make_jstring(value.message)
+        jni::make_jstring(value.message),
+        value.android.has_value() ? JGoogleSignInAndroidDiagnostics::fromCpp(value.android.value()) : nullptr
       );
     }
   };

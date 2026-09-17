@@ -1,12 +1,15 @@
 package com.googleauth
 
+import android.content.pm.PackageManager
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
 import androidx.credentials.exceptions.NoCredentialException
+import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -53,6 +56,7 @@ class HybridGoogleAuth : HybridGoogleAuthSpec() {
                         GoogleSignInError(
                             code = "CANCELLED",
                             message = "The user canceled the sign-in flow.",
+                            android = null,
                         ),
                 )
             } catch (_: NoCredentialException) {
@@ -64,7 +68,21 @@ class HybridGoogleAuth : HybridGoogleAuthSpec() {
                             message =
                                 "No Google credentials available on this device. " +
                                     "Make sure a Google account is present and try again.",
+                            android = null,
                         ),
+                )
+            } catch (error: GetCredentialProviderConfigurationException) {
+                val playServicesStatus = GoogleApiAvailabilityLight.getInstance()
+                    .isGooglePlayServicesAvailable(reactContext, MIN_GOOGLE_PLAY_SERVICES_VERSION)
+                @Suppress("DEPRECATION")
+                val playServicesVersion = try {
+                    reactContext.packageManager.getPackageInfo("com.google.android.gms", 0).versionName
+                } catch (_: PackageManager.NameNotFoundException) {
+                    null
+                }
+                return@async GoogleSignInResult(
+                    data = null,
+                    error = credentialProviderError(error, playServicesStatus, playServicesVersion),
                 )
             }
 

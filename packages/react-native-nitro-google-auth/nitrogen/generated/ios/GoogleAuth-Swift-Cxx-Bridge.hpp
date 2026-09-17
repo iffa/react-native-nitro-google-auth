@@ -8,6 +8,8 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `GoogleSignInAndroidDiagnostics` to properly resolve imports.
+namespace margelo::nitro::googleauth { struct GoogleSignInAndroidDiagnostics; }
 // Forward declaration of `GoogleSignInError` to properly resolve imports.
 namespace margelo::nitro::googleauth { struct GoogleSignInError; }
 // Forward declaration of `GoogleSignInResult` to properly resolve imports.
@@ -22,6 +24,7 @@ namespace margelo::nitro::googleauth { class HybridGoogleAuthSpec; }
 namespace GoogleAuth { class HybridGoogleAuthSpec_cxx; }
 
 // Include C++ defined types
+#include "GoogleSignInAndroidDiagnostics.hpp"
 #include "GoogleSignInError.hpp"
 #include "GoogleSignInResult.hpp"
 #include "GoogleUserData.hpp"
@@ -68,6 +71,21 @@ namespace margelo::nitro::googleauth::bridge::swift {
     return optional.has_value();
   }
   inline GoogleUserData get_std__optional_GoogleUserData_(const std::optional<GoogleUserData>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<GoogleSignInAndroidDiagnostics>
+  /**
+   * Specialized version of `std::optional<GoogleSignInAndroidDiagnostics>`.
+   */
+  using std__optional_GoogleSignInAndroidDiagnostics_ = std::optional<GoogleSignInAndroidDiagnostics>;
+  inline std::optional<GoogleSignInAndroidDiagnostics> create_std__optional_GoogleSignInAndroidDiagnostics_(const GoogleSignInAndroidDiagnostics& value) noexcept {
+    return std::optional<GoogleSignInAndroidDiagnostics>(value);
+  }
+  inline bool has_value_std__optional_GoogleSignInAndroidDiagnostics_(const std::optional<GoogleSignInAndroidDiagnostics>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline GoogleSignInAndroidDiagnostics get_std__optional_GoogleSignInAndroidDiagnostics_(const std::optional<GoogleSignInAndroidDiagnostics>& optional) noexcept {
     return optional.value();
   }
   
