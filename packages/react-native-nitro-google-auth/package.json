@@ -1,6 +1,6 @@
 {
   "name": "react-native-nitro-google-auth",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Sign in with Google for React Native, built with Nitro",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
