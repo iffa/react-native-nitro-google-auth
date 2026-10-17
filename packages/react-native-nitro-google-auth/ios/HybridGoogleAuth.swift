@@ -6,6 +6,9 @@ import UIKit
 private let gidSignInErrorDomain = "com.google.GIDSignIn"
 private let gidSignInCanceledCode = -5
 
+/// How long sign-in waits for an inactive scene to become active.
+private let sceneActivationTimeoutNanoseconds: UInt64 = 5_000_000_000
+
 class HybridGoogleAuth: HybridGoogleAuthSpec {
     private var authConfig: GoogleAuthConfig?
 
@@ -18,7 +21,16 @@ class HybridGoogleAuth: HybridGoogleAuthSpec {
             do {
                 let configuration = try self.resolveConfiguration()
                 try Self.validateRequiredUrlScheme()
-                let presentingViewController = try await Self.getPresentingViewController()
+                guard let presentingViewController = await Self.getPresentingViewController() else {
+                    return GoogleSignInResult(
+                        data: nil,
+                        error: GoogleSignInError(
+                            code: "NO_ACTIVE_WINDOW",
+                            message: "No active window to present Google sign-in from.",
+                            android: nil
+                        )
+                    )
+                }
                 let signInResult = try await self.performSignIn(
                     configuration: configuration,
                     presentingViewController: presentingViewController
@@ -117,17 +129,51 @@ class HybridGoogleAuth: HybridGoogleAuthSpec {
         }
     }
 
+    /// Google's sheet needs an active scene. The app has none for a moment
+    /// under Control Center, a system prompt, a half-finished app switcher
+    /// gesture or while it returns from the background. A sign-in call can
+    /// land in that moment, so it waits for a scene to become active.
     @MainActor
-    private static func getPresentingViewController() throws -> UIViewController {
-        guard
-            let windowScene = UIApplication.shared.connectedScenes
-                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-            let rootViewController = windowScene.windows.first(where: \.isKeyWindow)?.rootViewController
-        else {
-            throw GoogleAuthError.missingPresentingViewController
+    private static func getPresentingViewController() async -> UIViewController? {
+        if activeWindowScene() == nil {
+            await waitForSceneActivation()
         }
 
-        return topMostViewController(from: rootViewController)
+        return activeWindowScene()
+            .flatMap { $0.windows.first(where: \.isKeyWindow)?.rootViewController }
+            .map(topMostViewController(from:))
+    }
+
+    @MainActor
+    private static func activeWindowScene() -> UIWindowScene? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first(where: { $0.activationState == .foregroundActive })
+    }
+
+    /// Returns when any scene becomes active, or on timeout.
+    @MainActor
+    private static func waitForSceneActivation() async {
+        let activations = NotificationCenter.default.notifications(named: UIScene.didActivateNotification)
+
+        // Subscribed above, so an activation between here and the loop is not lost
+        if activeWindowScene() != nil {
+            return
+        }
+
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                for await _ in activations {
+                    return
+                }
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: sceneActivationTimeoutNanoseconds)
+            }
+
+            await group.next()
+            group.cancelAll()
+        }
     }
 
     @MainActor
@@ -147,13 +193,18 @@ class HybridGoogleAuth: HybridGoogleAuthSpec {
     }
 }
 
-private enum GoogleAuthError: LocalizedError {
+/// Nitro passes a thrown error to JS as `String(describing:)`, which is the
+/// case name unless the error describes itself.
+private enum GoogleAuthError: LocalizedError, CustomStringConvertible {
     case missingIdToken
     case missingProviderUserId
     case missingIosClientId
     case missingWebClientId
-    case missingPresentingViewController
     case missingUrlScheme
+
+    var description: String {
+        errorDescription ?? String(reflecting: self)
+    }
 
     var errorDescription: String? {
         switch self {
@@ -165,8 +216,6 @@ private enum GoogleAuthError: LocalizedError {
             return "Set iosClientId via GoogleAuth.configure(...) before calling signIn()."
         case .missingWebClientId:
             return "Set webClientId via GoogleAuth.configure(...) before calling signIn()."
-        case .missingPresentingViewController:
-            return "Unable to find a presenting view controller for Google sign-in."
         case .missingUrlScheme:
             return "Add a URL scheme starting with \"com.googleusercontent.apps\" in Info.plist CFBundleURLTypes for Google Sign-In."
         }
