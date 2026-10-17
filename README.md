@@ -139,7 +139,7 @@ Cancellation, missing credentials, a missing window, and Android provider config
 | `PLAY_SERVICES_INVALID`           | Google Play services failed its validity check. Offer another sign-in method.                                                                                                        |
 | `PLAY_SERVICES_UNAVAILABLE`       | Another Play services availability failure occurred. Inspect `error.android.playServicesStatus`.                                                                                     |
 | `CREDENTIAL_PROVIDER_UNAVAILABLE` | Play services passed its availability check, but Credential Manager could not use a provider. Inspect the native diagnostics and the app's merged Android manifest and dependencies. |
-| `NO_ACTIVE_WINDOW`                | No window could present sign-in. The app stayed inactive for 5 seconds after the tap, for example under Control Center. iOS only. Ask the user to try again.                         |
+| `NO_ACTIVE_WINDOW`                | No window could present sign-in. The app had no active scene for 5 seconds after the call, for example under Control Center. iOS only. Ask the user to try again.                    |
 
 The `PLAY_SERVICES_*` and `CREDENTIAL_PROVIDER_UNAVAILABLE` codes are Android-only. The library checks Play services after a provider configuration failure and preserves the native exception in `error.android`. It does not open settings, show alerts, or start updates. The app chooses the UI and translates its messages.
 

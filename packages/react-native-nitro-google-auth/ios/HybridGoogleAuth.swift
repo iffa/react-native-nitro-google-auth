@@ -129,61 +129,50 @@ class HybridGoogleAuth: HybridGoogleAuthSpec {
         }
     }
 
-    /// Google's sheet needs an active scene. A scene goes inactive while the
-    /// app is still on screen, for example under Control Center, a system
-    /// prompt or a half-finished app switcher gesture. A tap can land in that
-    /// state, so sign-in waits for the scene to become active again.
+    /// Google's sheet needs an active scene. The app has none for a moment
+    /// under Control Center, a system prompt, a half-finished app switcher
+    /// gesture or while it returns from the background. A sign-in call can
+    /// land in that moment, so it waits for a scene to become active.
     @MainActor
     private static func getPresentingViewController() async -> UIViewController? {
-        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
-
-        if let windowScene = windowScenes.first(where: { $0.activationState == .foregroundActive }) {
-            return keyRootViewController(in: windowScene).map(topMostViewController(from:))
+        if activeWindowScene() == nil {
+            await waitForSceneActivation()
         }
 
-        guard
-            let windowScene = windowScenes.first(where: { $0.activationState == .foregroundInactive }),
-            await waitForActivation(of: windowScene)
-        else {
-            return nil
-        }
-
-        return keyRootViewController(in: windowScene).map(topMostViewController(from:))
+        return activeWindowScene()
+            .flatMap { $0.windows.first(where: \.isKeyWindow)?.rootViewController }
+            .map(topMostViewController(from:))
     }
 
     @MainActor
-    private static func keyRootViewController(in windowScene: UIWindowScene) -> UIViewController? {
-        windowScene.windows.first(where: \.isKeyWindow)?.rootViewController
+    private static func activeWindowScene() -> UIWindowScene? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first(where: { $0.activationState == .foregroundActive })
     }
 
-    /// Resolves true when the scene becomes active, false on timeout.
+    /// Returns when any scene becomes active, or on timeout.
     @MainActor
-    private static func waitForActivation(of scene: UIScene) async -> Bool {
-        let activations = NotificationCenter.default.notifications(
-            named: UIScene.didActivateNotification,
-            object: scene
-        )
+    private static func waitForSceneActivation() async {
+        let activations = NotificationCenter.default.notifications(named: UIScene.didActivateNotification)
 
         // Subscribed above, so an activation between here and the loop is not lost
-        if scene.activationState == .foregroundActive {
-            return true
+        if activeWindowScene() != nil {
+            return
         }
 
-        return await withTaskGroup(of: Bool.self) { group in
+        await withTaskGroup(of: Void.self) { group in
             group.addTask {
                 for await _ in activations {
-                    return true
+                    return
                 }
-                return false
             }
             group.addTask {
                 try? await Task.sleep(nanoseconds: sceneActivationTimeoutNanoseconds)
-                return false
             }
 
-            let activated = await group.next() ?? false
+            await group.next()
             group.cancelAll()
-            return activated
         }
     }
 
