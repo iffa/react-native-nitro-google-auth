@@ -7,7 +7,7 @@
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
-      "source": "./src/index.ts",
+      "react-native-nitro-google-auth-source": "./src/index.ts",
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
@@ -53,9 +53,6 @@
     "README.md",
     "LICENSE"
   ],
-  "workspaces": [
-    "example"
-  ],
   "repository": "https://github.com/iffa/react-native-nitro-google-auth.git",
   "author": "Santeri Elo",
   "license": "MIT",
@@ -66,25 +63,25 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^24.12.2",
-    "@types/react": "19.2.14",
-    "@expo/config-plugins": "^55.0.7",
-    "@expo/config-types": "^55.0.5",
-    "conventional-changelog-conventionalcommits": "^9.1.0",
-    "expo-module-scripts": "^55.0.2",
-    "expo-modules-core": "^55.0.20",
-    "nitrogen": "0.35.3",
-    "react": "19.2.3",
-    "react-native": "0.84.1",
-    "react-native-builder-bob": "^0.41.0",
-    "react-native-nitro-modules": "0.35.3",
-    "typescript": "^5.9.3"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "@types/react": "19.3.0",
+    "@expo/config-plugins": "^58.0.9",
+    "@expo/config-types": "^58.0.3",
+    "conventional-changelog-conventionalcommits": "^10.4.1",
+    "expo-module-scripts": "^56.0.3",
+    "expo-modules-core": "^58.0.22",
+    "nitrogen": "0.37.1",
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-builder-bob": "^0.43.2",
+    "react-native-nitro-modules": "0.37.1",
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*",
-    "react-native-nitro-modules": "*",
+    "react-native": ">=0.75.0",
+    "react-native-nitro-modules": ">=0.37.0",
     "expo": "*"
   },
   "peerDependenciesMeta": {
@@ -101,8 +98,7 @@
       [
         "typescript",
         {
-          "project": "tsconfig.json",
-          "tsc": "../../node_modules/typescript/bin/tsc"
+          "project": "tsconfig.json"
         }
       ]
     ]

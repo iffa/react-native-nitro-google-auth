@@ -27,6 +27,6 @@ Pod::Spec.new do |s|
 
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
-  s.dependency 'GoogleSignIn'
+  s.dependency 'GoogleSignIn', '~> 10.0'
   install_modules_dependencies(s)
 end

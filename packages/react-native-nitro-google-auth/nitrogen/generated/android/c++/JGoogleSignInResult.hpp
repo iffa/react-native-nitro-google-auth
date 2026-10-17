@@ -24,7 +24,7 @@ namespace margelo::nitro::googleauth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GoogleSignInResult" and the the Kotlin data class "GoogleSignInResult".
+   * The C++ JNI bridge between the C++ struct "GoogleSignInResult" and the Kotlin data class "GoogleSignInResult".
    */
   struct JGoogleSignInResult final: public jni::JavaClass<JGoogleSignInResult> {
   public:

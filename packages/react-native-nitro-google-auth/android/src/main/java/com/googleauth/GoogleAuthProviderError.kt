@@ -5,7 +5,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.margelo.nitro.googleauth.GoogleSignInAndroidDiagnostics
 import com.margelo.nitro.googleauth.GoogleSignInError
 
-// Matches CredentialProviderPlayServicesImpl.MIN_GMS_APK_VERSION in AndroidX Credentials 1.6.0-rc02.
+// Matches CredentialProviderPlayServicesImpl.MIN_GMS_APK_VERSION in AndroidX Credentials 1.6.0.
 internal const val MIN_GOOGLE_PLAY_SERVICES_VERSION = 230815045
 
 internal fun credentialProviderError(

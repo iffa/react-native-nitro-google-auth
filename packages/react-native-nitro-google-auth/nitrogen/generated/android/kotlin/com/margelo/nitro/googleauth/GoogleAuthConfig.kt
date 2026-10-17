@@ -9,6 +9,7 @@ package com.margelo.nitro.googleauth
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -25,6 +26,20 @@ data class GoogleAuthConfig(
   val webClientId: String?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GoogleAuthConfig) return false
+    return Objects.deepEquals(this.iosClientId, other.iosClientId)
+      && Objects.deepEquals(this.webClientId, other.webClientId)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf<Any?>(
+      iosClientId,
+      webClientId
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

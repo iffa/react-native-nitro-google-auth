@@ -9,6 +9,7 @@ package com.margelo.nitro.googleauth
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -34,6 +35,26 @@ data class GoogleSignInAndroidDiagnostics(
   val nativeStackTrace: String
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GoogleSignInAndroidDiagnostics) return false
+    return Objects.deepEquals(this.playServicesStatus, other.playServicesStatus)
+      && Objects.deepEquals(this.playServicesVersion, other.playServicesVersion)
+      && Objects.deepEquals(this.nativeExceptionType, other.nativeExceptionType)
+      && Objects.deepEquals(this.nativeMessage, other.nativeMessage)
+      && Objects.deepEquals(this.nativeStackTrace, other.nativeStackTrace)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf<Any?>(
+      playServicesStatus,
+      playServicesVersion,
+      nativeExceptionType,
+      nativeMessage,
+      nativeStackTrace
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

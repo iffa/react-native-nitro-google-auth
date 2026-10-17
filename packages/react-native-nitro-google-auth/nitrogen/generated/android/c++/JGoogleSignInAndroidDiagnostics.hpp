@@ -18,7 +18,7 @@ namespace margelo::nitro::googleauth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GoogleSignInAndroidDiagnostics" and the the Kotlin data class "GoogleSignInAndroidDiagnostics".
+   * The C++ JNI bridge between the C++ struct "GoogleSignInAndroidDiagnostics" and the Kotlin data class "GoogleSignInAndroidDiagnostics".
    */
   struct JGoogleSignInAndroidDiagnostics final: public jni::JavaClass<JGoogleSignInAndroidDiagnostics> {
   public:

@@ -10,12 +10,12 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "expo": "^55.0.11",
-    "expo-status-bar": "~55.0.5",
-    "react": "19.2.0",
-    "react-native": "0.83.4",
+    "expo": "^58.0.14",
+    "expo-status-bar": "~58.0.3",
+    "react": "19.3.0",
+    "react-native": "0.88.0",
     "react-native-nitro-google-auth": "workspace:*",
-    "react-native-nitro-modules": "0.35.3",
-    "react-native-safe-area-context": "^5.7.0"
+    "react-native-nitro-modules": "0.37.1",
+    "react-native-safe-area-context": "~5.10.1"
   }
 }

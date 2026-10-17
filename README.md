@@ -22,6 +22,18 @@ pnpm add react-native-nitro-google-auth react-native-nitro-modules
 bun add react-native-nitro-google-auth react-native-nitro-modules
 ```
 
+## Requirements
+
+| Dependency                   | Minimum |
+| ---------------------------- | ------- |
+| React Native                 | 0.75    |
+| `react-native-nitro-modules` | 0.37    |
+| iOS deployment target        | 15.1    |
+| Android `minSdk`             | 24      |
+| Android `compileSdk`         | 35      |
+
+The example app uses Expo SDK 58 with React Native 0.88.
+
 ## Google Cloud — OAuth clients
 
 Create **Web**, **Android**, and **iOS** OAuth clients in **one** project: [Google Cloud Console → Clients](https://console.cloud.google.com/auth/clients).
@@ -81,25 +93,28 @@ export default {
 ## Bare React Native (iOS)
 
 1. **URL scheme** — Add the reversed client ID to **CFBundleURLTypes**
-2. **Open URL** — Implement the URL handler to forward to `GIDSignIn` so Google can complete the flow:
+2. **Open URL** — Forward opened URLs to `GIDSignIn` so Google can complete the flow. The React Native 0.88 template uses the UIScene life cycle, so this goes in `SceneDelegate.swift`:
 
 ```swift
-// AppDelegate.swift
+// SceneDelegate.swift
 import GoogleSignIn
 
-func application(
-  _ app: UIApplication,
-  open url: URL,
-  options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-) -> Bool {
-  if GIDSignIn.sharedInstance.handle(url) {
-    return true
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+  for context in URLContexts where GIDSignIn.sharedInstance.handle(context.url) {
+    return
   }
-  return false
+  RCTLinkingManager.scene(scene, openURLContexts: URLContexts)
 }
 ```
 
-Merge this with your existing `application(_:open:options:)` if you already have one; forward to `GIDSignIn` before other handlers.
+3. **Modular headers** — Google Sign-In depends on `AppCheckCore`, a Swift pod that imports `GoogleUtilities` and `RecaptchaInterop`. Without `use_frameworks!`, enable modular headers for them in the `Podfile` app target, or `pod install` fails:
+
+```ruby
+pod 'GoogleUtilities', :modular_headers => true
+pod 'RecaptchaInterop', :modular_headers => true
+```
+
+Expo apps need neither step: the Expo module forwards URLs and declares these pods.
 
 ## API
 
@@ -143,16 +158,16 @@ Cancellation, missing credentials, a missing window, and Android provider config
 
 The `PLAY_SERVICES_*` and `CREDENTIAL_PROVIDER_UNAVAILABLE` codes are Android-only. The library checks Play services after a provider configuration failure and preserves the native exception in `error.android`. It does not open settings, show alerts, or start updates. The app chooses the UI and translates its messages.
 
-AndroidX can report "no provider dependencies found" when Play services is unavailable, even when the app includes the provider dependency. This library includes `credentials-play-services-auth`. The availability check uses the provider's minimum Play services version, currently `230815045` for AndroidX Credentials `1.6.0-rc02`.
+AndroidX can report "no provider dependencies found" when Play services is unavailable, even when the app includes the provider dependency. This library includes `credentials-play-services-auth`. The availability check uses the provider's minimum Play services version, currently `230815045` for AndroidX Credentials `1.6.0`.
 
 Version `0.2.0` adds native bindings. Existing apps must rebuild their Android and iOS binaries before using it. An Expo OTA update alone cannot install these changes.
 
 ## Troubleshooting
 
-| Symptom                                                                       | Checks                                                                                                                                                     |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Android: `NoCredentialException`, `Developer console is not set up correctly` | `webClientId` is a **Web** client; Android OAuth client matches **package name + SHA-1**; same GCP project for all clients.                                |
-| iOS sign-in fails                                                             | Bundle ID matches iOS OAuth client; URL scheme is the **reversed** client ID; `application(_:open:options:)` calls `GIDSignIn.sharedInstance.handle(url)`. |
+| Symptom                                                                       | Checks                                                                                                                                                                 |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Android: `NoCredentialException`, `Developer console is not set up correctly` | `webClientId` is a **Web** client; Android OAuth client matches **package name + SHA-1**; same GCP project for all clients.                                            |
+| iOS sign-in fails                                                             | Bundle ID matches iOS OAuth client; URL scheme is the **reversed** client ID; bare apps forward `scene(_:openURLContexts:)` to `GIDSignIn.sharedInstance.handle(url)`. |
 
 ## References
 
@@ -183,7 +198,7 @@ From `packages/example/android`, run the native tests and build:
 
 Set `ANDROID_HOME` to your Android SDK directory before running Gradle.
 
-For the iOS example, generate the native project with `bun run --filter example prebuild --platform ios --no-install`. From `packages/example/ios`, run `USE_FRAMEWORKS=static pod install`, then build `example.xcworkspace` in Xcode. Static frameworks provide the modules required by Google's Swift dependencies.
+For the iOS example, generate the native project with `bun run --filter example prebuild --platform ios --no-install`. From `packages/example/ios`, run `LANG=en_US.UTF-8 pod install`, then build `example.xcworkspace` in Xcode.
 
 After changing the Nitro spec, run `bun run --filter react-native-nitro-google-auth codegen` and commit the generated bindings.
 
