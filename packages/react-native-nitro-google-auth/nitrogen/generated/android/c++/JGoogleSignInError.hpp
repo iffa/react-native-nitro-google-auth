@@ -20,7 +20,7 @@ namespace margelo::nitro::googleauth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GoogleSignInError" and the the Kotlin data class "GoogleSignInError".
+   * The C++ JNI bridge between the C++ struct "GoogleSignInError" and the Kotlin data class "GoogleSignInError".
    */
   struct JGoogleSignInError final: public jni::JavaClass<JGoogleSignInError> {
   public:

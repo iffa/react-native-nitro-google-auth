@@ -1,6 +1,7 @@
 package com.googleauth
 
 import android.content.pm.PackageManager
+import androidx.annotation.Keep
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -9,6 +10,7 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
 import androidx.credentials.exceptions.NoCredentialException
+import com.facebook.proguard.annotations.DoNotStrip
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -21,6 +23,8 @@ import com.margelo.nitro.googleauth.GoogleSignInResult
 import com.margelo.nitro.googleauth.GoogleUserData
 import com.margelo.nitro.googleauth.HybridGoogleAuthSpec
 
+@Keep
+@DoNotStrip
 class HybridGoogleAuth : HybridGoogleAuthSpec() {
     private var authConfig = GoogleAuthConfig(
         iosClientId = null,

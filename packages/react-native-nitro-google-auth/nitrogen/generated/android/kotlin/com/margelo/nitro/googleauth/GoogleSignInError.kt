@@ -9,6 +9,7 @@ package com.margelo.nitro.googleauth
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -28,6 +29,22 @@ data class GoogleSignInError(
   val android: GoogleSignInAndroidDiagnostics?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GoogleSignInError) return false
+    return Objects.deepEquals(this.code, other.code)
+      && Objects.deepEquals(this.message, other.message)
+      && Objects.deepEquals(this.android, other.android)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf<Any?>(
+      code,
+      message,
+      android
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

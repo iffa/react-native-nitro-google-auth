@@ -10,14 +10,18 @@ Pod::Spec.new do |s|
   s.license = package['license']
   s.author = package['author']
   s.homepage = package['homepage']
-  s.platform = :ios, '13.4'
+  s.platform = :ios, '15.1'
   s.swift_version = '5.4'
   s.source = { :git => package['repository'], :tag => "#{s.version}" }
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
   s.dependency 'React-Core'
-  s.dependency 'GoogleSignIn'
+  s.dependency 'GoogleSignIn', '~> 10.0'
+  # AppCheckCore (through GoogleSignIn) imports these from Swift. Expo autolinking enables
+  # modular headers only for direct dependencies, so a static library build needs them listed here.
+  s.dependency 'GoogleUtilities'
+  s.dependency 'RecaptchaInterop'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',

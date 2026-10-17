@@ -9,6 +9,7 @@ package com.margelo.nitro.googleauth
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -34,6 +35,26 @@ data class GoogleUserData(
   val photoUrl: String?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GoogleUserData) return false
+    return Objects.deepEquals(this.idToken, other.idToken)
+      && Objects.deepEquals(this.providerUserId, other.providerUserId)
+      && Objects.deepEquals(this.email, other.email)
+      && Objects.deepEquals(this.name, other.name)
+      && Objects.deepEquals(this.photoUrl, other.photoUrl)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf<Any?>(
+      idToken,
+      providerUserId,
+      email,
+      name,
+      photoUrl
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**
