@@ -1,4 +1,5 @@
 require "json"
+require File.expand_path("google_auth_spm", __dir__)
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
@@ -11,7 +12,7 @@ Pod::Spec.new do |s|
   s.authors      = package["author"]
 
   s.platforms    = { :ios => min_ios_version_supported }
-  s.source       = { :git => "https://github.com/santerielo/react-native-nitro-google-auth.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/iffa/react-native-nitro-google-auth.git", :tag => "#{s.version}" }
 
   s.source_files = [
     # Implementation (Swift)
@@ -27,6 +28,6 @@ Pod::Spec.new do |s|
 
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
-  s.dependency 'GoogleSignIn', '~> 10.0'
+  google_auth_sign_in_dependency(s)
   install_modules_dependencies(s)
 end

@@ -1,6 +1,6 @@
 {
   "name": "react-native-nitro-google-auth",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Sign in with Google for React Native, built with Nitro",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
@@ -50,6 +50,7 @@
     "expo",
     "expo-module.config.json",
     "*.podspec",
+    "google_auth_spm.rb",
     "README.md",
     "LICENSE"
   ],
