@@ -145,7 +145,27 @@ func handleGoogleSignInURL(_ url: URL) -> Bool {
 
 ### 1. CocoaPods (default)
 
-No configuration.
+No configuration for this library. With `@react-native-firebase/*` 26.x and static frameworks, React Native Firebase stops `pod install` until its own SPM mode is off:
+
+```ruby
+# ios/Podfile
+$RNFirebaseDisableSPM = true
+```
+
+Xcode 27 fails the build when a pod target's deployment target is below iOS 15, and the Firebase CocoaPods resource bundles still set 9.0 or 12.0. Raise them in `post_install`:
+
+```ruby
+post_install do |installer|
+  # react_native_post_install(...)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_ios_version_supported.to_f
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+      end
+    end
+  end
+end
+```
 
 ### 2. CocoaPods with Swift Package Manager for GoogleSignIn
 
