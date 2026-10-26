@@ -1,10 +1,18 @@
 #if canImport(ExpoModulesCore)
 import ExpoModulesCore
+#if GOOGLE_AUTH_SPM
+import ObjectiveC
+#else
 import GoogleSignIn
+#endif
 
 public class GoogleAuthAppDelegate: ExpoAppDelegateSubscriber {
   private func handleSignInURL(_ url: URL) throws -> Bool {
+#if GOOGLE_AUTH_SPM
+    return try SignInURLForwarder.handle(url)
+#else
     return GIDSignIn.sharedInstance.handle(url)
+#endif
   }
 
   public func application(
@@ -20,4 +28,35 @@ public class GoogleAuthAppDelegate: ExpoAppDelegateSubscriber {
     }
   }
 }
+
+#if GOOGLE_AUTH_SPM
+/// Calls `[[GIDSignIn sharedInstance] handleURL:]` on the GoogleSignIn copy that the
+/// GoogleAuth pod links from Swift Package Manager, without linking a second copy here.
+private enum SignInURLForwarder {
+  struct Unavailable: Error, CustomStringConvertible {
+    let description: String
+  }
+
+  private typealias SharedInstance = @convention(c) (AnyClass, Selector) -> Unmanaged<AnyObject>
+  private typealias HandleURL = @convention(c) (AnyObject, Selector, NSURL) -> ObjCBool
+
+  static func handle(_ url: URL) throws -> Bool {
+    guard let signInClass = NSClassFromString("GIDSignIn") else {
+      throw Unavailable(description: "GIDSignIn is not linked into the app")
+    }
+    let sharedSelector = NSSelectorFromString("sharedInstance")
+    let handleSelector = NSSelectorFromString("handleURL:")
+    guard let sharedMethod = class_getClassMethod(signInClass, sharedSelector),
+          let handleMethod = class_getInstanceMethod(signInClass, handleSelector)
+    else {
+      throw Unavailable(description: "GIDSignIn does not respond to sharedInstance and handleURL:")
+    }
+
+    let sharedInstance = unsafeBitCast(method_getImplementation(sharedMethod), to: SharedInstance.self)
+    let handleURL = unsafeBitCast(method_getImplementation(handleMethod), to: HandleURL.self)
+    let signIn = sharedInstance(signInClass, sharedSelector).takeUnretainedValue()
+    return handleURL(signIn, handleSelector, url as NSURL).boolValue
+  }
+}
+#endif
 #endif

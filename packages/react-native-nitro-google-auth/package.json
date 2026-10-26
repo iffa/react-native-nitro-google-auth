@@ -50,6 +50,7 @@
     "expo",
     "expo-module.config.json",
     "*.podspec",
+    "google_auth_spm.rb",
     "README.md",
     "LICENSE"
   ],
