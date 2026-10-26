@@ -1,122 +1,113 @@
 # react-native-nitro-google-auth
 
-`react-native-nitro-google-auth` is a React Native package for implementing a "Sign in with Google" flow, built with Nitro modules.
+Sign in with Google for React Native, built with Nitro.
 
 [![Version](https://img.shields.io/npm/v/react-native-nitro-google-auth.svg)](https://www.npmjs.com/package/react-native-nitro-google-auth)
 [![Downloads](https://img.shields.io/npm/dm/react-native-nitro-google-auth.svg)](https://www.npmjs.com/package/react-native-nitro-google-auth)
 [![License](https://img.shields.io/npm/l/react-native-nitro-google-auth.svg)](https://github.com/iffa/react-native-nitro-google-auth/LICENSE)
 
-## Install
+## Quick start (Expo)
 
-```bash
-# npm
-npm install react-native-nitro-google-auth react-native-nitro-modules
+1. Install:
 
-# yarn
-yarn add react-native-nitro-google-auth react-native-nitro-modules
+   ```bash
+   npx expo install react-native-nitro-google-auth react-native-nitro-modules
+   ```
 
-# pnpm
-pnpm add react-native-nitro-google-auth react-native-nitro-modules
+2. Create **Web** and **iOS** OAuth clients (plus **Android**, see [OAuth clients](#oauth-clients)) in one Google Cloud project.
 
-# bun
-bun add react-native-nitro-google-auth react-native-nitro-modules
-```
+3. Add the config plugin. Pick the track that matches your Firebase setup:
+
+   **CocoaPods (default)**: no Firebase, or `@react-native-firebase/*` 26.x.
+
+   ```ts
+   plugins: [
+     ["react-native-nitro-google-auth", { iosUrlScheme: "com.googleusercontent.apps.123456789-abc" }],
+   ],
+   ```
+
+   **Swift Package Manager**: `@react-native-firebase/*` 27.x (Firebase 13). Resolves GoogleSignIn through SPM so it shares Firebase's `AppCheckCore` and `GoogleUtilities`.
+
+   ```ts
+   plugins: [
+     ["react-native-nitro-google-auth", { iosUrlScheme: "com.googleusercontent.apps.123456789-abc", iosUseSwiftPackageManager: true }],
+     ["expo-build-properties", { ios: { useFrameworks: "dynamic" } }],
+   ],
+   ```
+
+   `iosUrlScheme` is the **reversed** iOS client ID.
+
+4. Run `npx expo prebuild`, then build the app.
+
+5. Sign in:
+
+   ```ts
+   import { GoogleAuth } from "react-native-nitro-google-auth";
+
+   GoogleAuth.configure({
+     iosClientId: "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
+     webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+   });
+
+   const result = await GoogleAuth.signIn();
+   if (result.data) {
+     // Send result.data.idToken to your backend.
+   } else if (result.error?.code !== "CANCELLED") {
+     // Handle result.error.code.
+   }
+
+   await GoogleAuth.signOut();
+   ```
+
+The library is headless: build your own button following the [Sign in with Google branding guidelines](https://developers.google.com/identity/branding-guidelines).
 
 ## Requirements
 
-| Dependency                   | Minimum |
-| ---------------------------- | ------- |
-| React Native                 | 0.75    |
-| `react-native-nitro-modules` | 0.37    |
-| iOS deployment target        | 15.1    |
-| Android `minSdk`             | 24      |
-| Android `compileSdk`         | 35      |
+| Dependency                      | Minimum |
+| ------------------------------- | ------- |
+| React Native                    | 0.75    |
+| `react-native-nitro-modules`    | 0.37    |
+| iOS deployment target           | 15.1    |
+| Android `minSdk` / `compileSdk` | 24 / 35 |
 
-The example app uses Expo SDK 58 with React Native 0.88.
+React Native's CocoaPods-free `npx react-native spm` mode is not supported yet: `react-native-nitro-modules` 0.37 ships no `Package.swift` ([margelo/nitro#1045](https://github.com/margelo/nitro/issues/1045)).
 
-## Google Cloud — OAuth clients
+## OAuth clients
 
-Create **Web**, **Android**, and **iOS** OAuth clients in **one** project: [Google Cloud Console → Clients](https://console.cloud.google.com/auth/clients).
+Create them in one project under [Google Cloud Console → Clients](https://console.cloud.google.com/auth/clients).
 
-| Client              | Purpose                                                                                                                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Web application** | Use its client ID as `webClientId` in `GoogleAuth.configure(...)`.                                                                                                                                                       |
-| **Android**         | One client per package name + signing cert. **Package name** must match `applicationId`; **SHA-1** must match the keystore for the build you run. Wrong combo → runtime errors (e.g. credential / console setup errors). |
-| **iOS**             | **Bundle ID** must match the app exactly or you get a runtime error. Use its client ID as `iosClientId`.                                                                                                                 |
-
-## Usage
-
-> [!IMPORTANT]  
-> This library is by design headless. It does not provide a pre-built view for the sign-in button itself. You are expected to implement your own button that matches the [Sign in with Google Branding Guidelines](https://developers.google.com/identity/branding-guidelines).
-
-```ts
-import { GoogleAuth } from "react-native-nitro-google-auth";
-
-// Must be called before signIn()
-GoogleAuth.configure({
-  iosClientId: "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
-  webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
-});
-
-const result = await GoogleAuth.signIn();
-if (result.data) {
-  // Send result.data.idToken to your backend.
-} else if (result.error?.code !== "CANCELLED") {
-  // Show guidance based on result.error.code. Native Android diagnostics
-  // are available in result.error.android for error reporting.
-}
-
-await GoogleAuth.signOut();
-```
-
-## Expo
-
-Add the Expo config plugin with `iosUrlScheme` set to the **reversed** iOS client ID (see above). The plugin registers the URL scheme in `Info.plist`.
-
-`app.config.ts`:
-
-```ts
-export default {
-  expo: {
-    plugins: [
-      [
-        "react-native-nitro-google-auth",
-        {
-          iosUrlScheme: "com.googleusercontent.apps.123456789-abc",
-        },
-      ],
-    ],
-  },
-};
-```
+| Client      | Notes                                                                  |
+| ----------- | ---------------------------------------------------------------------- |
+| **Web**     | Its client ID is `webClientId`.                                        |
+| **iOS**     | Bundle ID must match the app. Its client ID is `iosClientId`.          |
+| **Android** | One per package name + signing certificate SHA-1 of the build you run. |
 
 ## Bare React Native (iOS)
 
-1. **URL scheme** — Add the reversed client ID to **CFBundleURLTypes**
-2. **Open URL** — Forward opened URLs to `GIDSignIn` so Google can complete the flow. The React Native 0.88 template uses the UIScene life cycle, so this goes in `SceneDelegate.swift`:
+Install with `npm install react-native-nitro-google-auth react-native-nitro-modules`, then:
 
-```swift
-// SceneDelegate.swift
-import GoogleSignIn
+1. Add the reversed iOS client ID to `CFBundleURLTypes`.
+2. Forward opened URLs to Google Sign-In in `SceneDelegate.swift`:
 
-func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-  for context in URLContexts where GIDSignIn.sharedInstance.handle(context.url) {
-    return
-  }
-  RCTLinkingManager.scene(scene, openURLContexts: URLContexts)
-}
-```
+   ```swift
+   import GoogleSignIn
 
-3. **Modular headers** — Google Sign-In depends on `AppCheckCore`, a Swift pod that imports `GoogleUtilities` and `RecaptchaInterop`. Without `use_frameworks!`, enable modular headers for them in the `Podfile` app target, or `pod install` fails:
+   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+     for context in URLContexts where GIDSignIn.sharedInstance.handle(context.url) {
+       return
+     }
+     RCTLinkingManager.scene(scene, openURLContexts: URLContexts)
+   }
+   ```
 
-```ruby
-pod 'GoogleUtilities', :modular_headers => true
-pod 'RecaptchaInterop', :modular_headers => true
-```
+3. Without `use_frameworks!`, enable modular headers in the Podfile app target:
 
-Expo apps need neither step: the Expo module forwards URLs and declares these pods.
+   ```ruby
+   pod 'GoogleUtilities', :modular_headers => true
+   pod 'RecaptchaInterop', :modular_headers => true
+   ```
 
-In Swift Package Manager mode (below), the app target cannot `import GoogleSignIn`. Forward the URL through the Objective-C runtime instead:
+For the Swift Package Manager track, set `$GoogleAuthUseSPM = true` and `use_frameworks! :linkage => :dynamic` in the Podfile. The app target then can't `import GoogleSignIn`, so forward the URL through the Objective-C runtime:
 
 ```swift
 func handleGoogleSignInURL(_ url: URL) -> Bool {
@@ -135,24 +126,15 @@ func handleGoogleSignInURL(_ url: URL) -> Bool {
 }
 ```
 
-## iOS dependency setups
+### Podfile notes for React Native Firebase 26
 
-| Setup                                                  | Firebase                                   | GoogleSignIn from                 | Status            |
-| ------------------------------------------------------ | ------------------------------------------ | --------------------------------- | ----------------- |
-| 1. CocoaPods, static frameworks or libraries (default) | none, or `@react-native-firebase/*` 26.x   | `GoogleSignIn` CocoaPod `~> 10.0` | Supported         |
-| 2. CocoaPods, `use_frameworks! :linkage => :dynamic`   | `@react-native-firebase/*` 27.x (SPM only) | Swift package `>= 10.1.0, < 11`   | Opt-in            |
-| 3. `npx react-native spm` (no CocoaPods)               | —                                          | —                                 | Not supported yet |
-
-### 1. CocoaPods (default)
-
-No configuration for this library. With `@react-native-firebase/*` 26.x and static frameworks, React Native Firebase stops `pod install` until its own SPM mode is off:
+With static frameworks, React Native Firebase 26 stops `pod install` until its SPM mode is off:
 
 ```ruby
-# ios/Podfile
 $RNFirebaseDisableSPM = true
 ```
 
-Xcode 27 fails the build when a pod target's deployment target is below iOS 15, and the Firebase CocoaPods resource bundles still set 9.0 or 12.0. Raise them in `post_install`:
+Xcode 27 rejects pod targets below iOS 15, which the Firebase CocoaPods resource bundles still use. Raise them in `post_install`:
 
 ```ruby
 post_install do |installer|
@@ -166,32 +148,6 @@ post_install do |installer|
   end
 end
 ```
-
-### 2. CocoaPods with Swift Package Manager for GoogleSignIn
-
-React Native Firebase 27 resolves Firebase 13 only through Swift Package Manager, so the GoogleSignIn CocoaPod would add a second `AppCheckCore` and `GoogleUtilities`. Opt in to resolve GoogleSignIn in the same package graph as Firebase:
-
-```ruby
-# ios/Podfile
-$GoogleAuthUseSPM = true
-
-use_frameworks! :linkage => :dynamic
-```
-
-With Expo, set the plugin option and dynamic frameworks, then run `npx expo prebuild`:
-
-```ts
-plugins: [
-  ["react-native-nitro-google-auth", { iosUrlScheme: "com.googleusercontent.apps.123456789-abc", iosUseSwiftPackageManager: true }],
-  ["expo-build-properties", { ios: { useFrameworks: "dynamic" } }],
-],
-```
-
-This requires React Native 0.75+ and dynamic frameworks, and resolves GoogleSignIn `>= 10.1.0, < 11`. On older React Native the flag is ignored with a warning.
-
-### 3. React Native's Swift Package Manager mode
-
-Not supported yet: `react-native-nitro-modules` 0.37 ships no `Package.swift` ([margelo/nitro#1045](https://github.com/margelo/nitro/issues/1045)). Nitro's SwiftPM support is on its unreleased v1 branch.
 
 ## API
 
@@ -233,18 +189,14 @@ Cancellation, missing credentials, a missing window, and Android provider config
 | `CREDENTIAL_PROVIDER_UNAVAILABLE` | Play services passed its availability check, but Credential Manager could not use a provider. Inspect the native diagnostics and the app's merged Android manifest and dependencies. |
 | `NO_ACTIVE_WINDOW`                | No window could present sign-in. The app had no active scene for 5 seconds after the call, for example under Control Center. iOS only. Ask the user to try again.                    |
 
-The `PLAY_SERVICES_*` and `CREDENTIAL_PROVIDER_UNAVAILABLE` codes are Android-only. The library checks Play services after a provider configuration failure and preserves the native exception in `error.android`. It does not open settings, show alerts, or start updates. The app chooses the UI and translates its messages.
-
-AndroidX can report "no provider dependencies found" when Play services is unavailable, even when the app includes the provider dependency. This library includes `credentials-play-services-auth`. The availability check uses the provider's minimum Play services version, currently `230815045` for AndroidX Credentials `1.6.0`.
-
-Version `0.2.0` adds native bindings. Existing apps must rebuild their Android and iOS binaries before using it. An Expo OTA update alone cannot install these changes.
+`PLAY_SERVICES_*` and `CREDENTIAL_PROVIDER_UNAVAILABLE` are Android-only; the native exception is kept in `error.android`. The library never shows UI on its own.
 
 ## Troubleshooting
 
-| Symptom                                                                       | Checks                                                                                                                                                                 |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Android: `NoCredentialException`, `Developer console is not set up correctly` | `webClientId` is a **Web** client; Android OAuth client matches **package name + SHA-1**; same GCP project for all clients.                                            |
-| iOS sign-in fails                                                             | Bundle ID matches iOS OAuth client; URL scheme is the **reversed** client ID; bare apps forward `scene(_:openURLContexts:)` to `GIDSignIn.sharedInstance.handle(url)`. |
+| Symptom                                                                       | Checks                                                                                                          |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Android: `NoCredentialException`, `Developer console is not set up correctly` | `webClientId` is a **Web** client; the Android client matches package name + SHA-1; all clients in one project. |
+| iOS sign-in fails                                                             | Bundle ID matches the iOS client; `iosUrlScheme` is the **reversed** client ID; bare apps forward opened URLs.  |
 
 ## References
 
