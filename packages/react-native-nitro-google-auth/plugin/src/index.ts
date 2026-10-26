@@ -18,11 +18,7 @@ const pkg = require("react-native-nitro-google-auth/package.json");
 export type GoogleAuthConfigPluginOptions = {
   /** Reversed iOS client ID URL scheme, e.g. com.googleusercontent.apps.xxx */
   iosUrlScheme: string;
-  /**
-   * Resolve GoogleSignIn through Swift Package Manager instead of CocoaPods.
-   * Use it with React Native Firebase 27+ and `useFrameworks: "dynamic"`.
-   * Writes `$GoogleAuthUseSPM = true` to the Podfile.
-   */
+  /** Resolve GoogleSignIn through Swift Package Manager (sets `$GoogleAuthUseSPM` in the Podfile). */
   iosUseSwiftPackageManager?: boolean;
 };
 

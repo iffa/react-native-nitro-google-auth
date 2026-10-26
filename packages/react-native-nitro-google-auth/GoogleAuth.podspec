@@ -28,7 +28,6 @@ Pod::Spec.new do |s|
 
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
-  # CocoaPod by default; SPM when the Podfile sets `$GoogleAuthUseSPM = true`.
   google_auth_sign_in_dependency(s)
   install_modules_dependencies(s)
 end

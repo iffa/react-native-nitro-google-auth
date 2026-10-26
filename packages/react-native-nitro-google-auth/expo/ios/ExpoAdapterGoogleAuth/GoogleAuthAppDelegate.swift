@@ -30,8 +30,7 @@ public class GoogleAuthAppDelegate: ExpoAppDelegateSubscriber {
 }
 
 #if GOOGLE_AUTH_SPM
-/// Calls `[[GIDSignIn sharedInstance] handleURL:]` on the GoogleSignIn copy that the
-/// GoogleAuth pod links from Swift Package Manager, without linking a second copy here.
+/// Calls `[[GIDSignIn sharedInstance] handleURL:]` on the GoogleSignIn linked into GoogleAuth.
 private enum SignInURLForwarder {
   struct Unavailable: Error, CustomStringConvertible {
     let description: String

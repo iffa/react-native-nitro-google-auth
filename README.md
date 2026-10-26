@@ -116,10 +116,9 @@ pod 'RecaptchaInterop', :modular_headers => true
 
 Expo apps need neither step: the Expo module forwards URLs and declares these pods.
 
-In Swift Package Manager mode (below), the app target cannot `import GoogleSignIn`. Forward the URL through the Objective-C runtime instead, so it reaches the single GoogleSignIn copy linked into the `GoogleAuth` pod:
+In Swift Package Manager mode (below), the app target cannot `import GoogleSignIn`. Forward the URL through the Objective-C runtime instead:
 
 ```swift
-// SceneDelegate.swift, Swift Package Manager mode
 func handleGoogleSignInURL(_ url: URL) -> Bool {
   guard let signIn = NSClassFromString("GIDSignIn"),
         let shared = class_getClassMethod(signIn, NSSelectorFromString("sharedInstance")),
@@ -138,8 +137,6 @@ func handleGoogleSignInURL(_ url: URL) -> Bool {
 
 ## iOS dependency setups
 
-GoogleSignIn reaches the app in one of three ways. Choose the one that matches how the app gets Firebase, if it uses Firebase.
-
 | Setup                                                  | Firebase                                   | GoogleSignIn from                 | Status            |
 | ------------------------------------------------------ | ------------------------------------------ | --------------------------------- | ----------------- |
 | 1. CocoaPods, static frameworks or libraries (default) | none, or `@react-native-firebase/*` 26.x   | `GoogleSignIn` CocoaPod `~> 10.0` | Supported         |
@@ -148,14 +145,14 @@ GoogleSignIn reaches the app in one of three ways. Choose the one that matches h
 
 ### 1. CocoaPods (default)
 
-No configuration. This is the behaviour of earlier releases.
+No configuration.
 
 ### 2. CocoaPods with Swift Package Manager for GoogleSignIn
 
-React Native Firebase 27 resolves Firebase 13 only through Swift Package Manager. The GoogleSignIn CocoaPod would then add a second copy of `AppCheckCore` and `GoogleUtilities`, so classes such as `GULAppEnvironmentUtil` would exist twice. Opt in to resolve GoogleSignIn through Swift Package Manager as well, in the same package graph as Firebase:
+React Native Firebase 27 resolves Firebase 13 only through Swift Package Manager, so the GoogleSignIn CocoaPod would add a second `AppCheckCore` and `GoogleUtilities`. Opt in to resolve GoogleSignIn in the same package graph as Firebase:
 
 ```ruby
-# ios/Podfile, before the target block
+# ios/Podfile
 $GoogleAuthUseSPM = true
 
 use_frameworks! :linkage => :dynamic
@@ -170,17 +167,11 @@ plugins: [
 ],
 ```
 
-Requirements and behaviour:
-
-- React Native 0.75 or later (`spm_dependency`). On older versions the flag is ignored with a warning and the CocoaPod is used.
-- Dynamic frameworks, as React Native Firebase 27 requires. Swift package products link statically into each pod that uses them, so static pods can duplicate them.
-- GoogleSignIn `10.1.0` or later. `10.0.0` only accepts `AppCheckCore` 11 and cannot resolve next to Firebase 13.
-- Only the `GoogleAuth` pod links GoogleSignIn. The Expo module forwards sign-in URLs to it through the Objective-C runtime and no longer depends on the `GoogleUtilities` and `RecaptchaInterop` pods.
-- Without the flag, or with `$GoogleAuthUseSPM = false`, the pods behave exactly as in setup 1.
+This requires React Native 0.75+ and dynamic frameworks, and resolves GoogleSignIn `>= 10.1.0, < 11`. On older React Native the flag is ignored with a warning.
 
 ### 3. React Native's Swift Package Manager mode
 
-Not supported yet. `react-native-nitro-modules` 0.37 ships no `Package.swift`, and this library cannot be built without it. See [docs/ios-spm.md](docs/ios-spm.md) for the details and the upstream work.
+Not supported yet: `react-native-nitro-modules` 0.37 ships no `Package.swift` ([margelo/nitro#1045](https://github.com/margelo/nitro/issues/1045)). Nitro's SwiftPM support is on its unreleased v1 branch.
 
 ## API
 

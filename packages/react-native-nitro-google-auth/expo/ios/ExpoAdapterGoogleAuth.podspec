@@ -24,9 +24,7 @@ Pod::Spec.new do |s|
   }
 
   if google_auth_use_spm?
-    # GoogleSignIn is linked once, into the GoogleAuth pod. A second copy here would
-    # carry its own GIDSignIn.sharedInstance, so the adapter forwards URLs to that one
-    # through the Objective-C runtime and does not import GoogleSignIn at all.
+    # Uses the GoogleSignIn linked into GoogleAuth; a second copy would have its own sharedInstance.
     pod_target_xcconfig['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) GOOGLE_AUTH_SPM'
   else
     s.dependency 'GoogleSignIn', GOOGLE_AUTH_SIGN_IN_POD_REQUIREMENT
