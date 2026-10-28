@@ -1,27 +1,15 @@
 #if canImport(ExpoModulesCore)
 import ExpoModulesCore
-#if GOOGLE_AUTH_SPM
 import ObjectiveC
-#else
-import GoogleSignIn
-#endif
 
 public class GoogleAuthAppDelegate: ExpoAppDelegateSubscriber {
-  private func handleSignInURL(_ url: URL) throws -> Bool {
-#if GOOGLE_AUTH_SPM
-    return try SignInURLForwarder.handle(url)
-#else
-    return GIDSignIn.sharedInstance.handle(url)
-#endif
-  }
-
   public func application(
     _ application: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     do {
-      return try handleSignInURL(url)
+      return try SignInURLForwarder.handle(url)
     } catch {
       NSLog("[react-native-nitro-google-auth] Failed to handle sign-in URL: %@", String(describing: error))
       return false
@@ -29,8 +17,8 @@ public class GoogleAuthAppDelegate: ExpoAppDelegateSubscriber {
   }
 }
 
-#if GOOGLE_AUTH_SPM
 /// Calls `[[GIDSignIn sharedInstance] handleURL:]` on the GoogleSignIn linked into GoogleAuth.
+/// Linking a second copy here would give it its own `sharedInstance`.
 private enum SignInURLForwarder {
   struct Unavailable: Error, CustomStringConvertible {
     let description: String
@@ -57,5 +45,4 @@ private enum SignInURLForwarder {
     return handleURL(signIn, handleSelector, url as NSURL).boolValue
   }
 }
-#endif
 #endif

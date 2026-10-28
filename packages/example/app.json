@@ -23,7 +23,8 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.725900148453-ih6etjmooe7p8q465379bq9ute0si6v0"
         }
-      ]
+      ],
+      ["expo-build-properties", { "ios": { "useFrameworks": "dynamic" } }]
     ]
   }
 }
