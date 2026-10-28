@@ -1,5 +1,4 @@
 require 'json'
-require File.expand_path('../../google_auth_spm', __dir__)
 
 package = JSON.parse(File.read(File.join(__dir__, '..', '..', 'package.json')))
 
@@ -19,22 +18,9 @@ Pod::Spec.new do |s|
   s.dependency 'ExpoModulesCore'
   s.dependency 'React-Core'
 
-  pod_target_xcconfig = {
+  s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
   }
-
-  if google_auth_use_spm?
-    # Uses the GoogleSignIn linked into GoogleAuth; a second copy would have its own sharedInstance.
-    pod_target_xcconfig['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) GOOGLE_AUTH_SPM'
-  else
-    s.dependency 'GoogleSignIn', GOOGLE_AUTH_SIGN_IN_POD_REQUIREMENT
-    # AppCheckCore (through GoogleSignIn) imports these from Swift. Expo autolinking enables
-    # modular headers only for direct dependencies, so a static library build needs them listed here.
-    s.dependency 'GoogleUtilities'
-    s.dependency 'RecaptchaInterop'
-  end
-
-  s.pod_target_xcconfig = pod_target_xcconfig
 
   s.source_files = 'ExpoAdapterGoogleAuth/**/*.{h,m,swift}'
 end

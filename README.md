@@ -16,21 +16,11 @@ Sign in with Google for React Native, built with Nitro.
 
 2. Create **Web** and **iOS** OAuth clients (plus **Android**, see [OAuth clients](#oauth-clients)) in one Google Cloud project.
 
-3. Add the config plugin. Pick the track that matches your Firebase setup:
-
-   **CocoaPods (default)**: no Firebase, or `@react-native-firebase/*` 26.x.
+3. Add the config plugin. GoogleSignIn is resolved through Swift Package Manager, which needs dynamic frameworks:
 
    ```ts
    plugins: [
      ["react-native-nitro-google-auth", { iosUrlScheme: "com.googleusercontent.apps.123456789-abc" }],
-   ],
-   ```
-
-   **Swift Package Manager**: `@react-native-firebase/*` 27.x (Firebase 13). Resolves GoogleSignIn through SPM so it shares Firebase's `AppCheckCore` and `GoogleUtilities`.
-
-   ```ts
-   plugins: [
-     ["react-native-nitro-google-auth", { iosUrlScheme: "com.googleusercontent.apps.123456789-abc", iosUseSwiftPackageManager: true }],
      ["expo-build-properties", { ios: { useFrameworks: "dynamic" } }],
    ],
    ```
@@ -63,12 +53,15 @@ The library is headless: build your own button following the [Sign in with Googl
 
 ## Requirements
 
-| Dependency                      | Minimum |
-| ------------------------------- | ------- |
-| React Native                    | 0.75    |
-| `react-native-nitro-modules`    | 0.37    |
-| iOS deployment target           | 15.1    |
-| Android `minSdk` / `compileSdk` | 24 / 35 |
+| Dependency                      | Minimum      |
+| ------------------------------- | ------------ |
+| React Native                    | 0.75         |
+| `react-native-nitro-modules`    | 0.37         |
+| `@react-native-firebase/*`      | 27 (if used) |
+| iOS deployment target           | 15.1         |
+| Android `minSdk` / `compileSdk` | 24 / 35      |
+
+GoogleSignIn comes from Swift Package Manager through React Native's `spm_dependency`, so it shares Firebase 13's `AppCheckCore` and `GoogleUtilities`. React Native Firebase 26 and older pull these from CocoaPods and conflict with it.
 
 React Native's CocoaPods-free `npx react-native spm` mode is not supported yet: `react-native-nitro-modules` 0.37 ships no `Package.swift` ([margelo/nitro#1045](https://github.com/margelo/nitro/issues/1045)).
 
@@ -87,27 +80,8 @@ Create them in one project under [Google Cloud Console → Clients](https://cons
 Install with `npm install react-native-nitro-google-auth react-native-nitro-modules`, then:
 
 1. Add the reversed iOS client ID to `CFBundleURLTypes`.
-2. Forward opened URLs to Google Sign-In in `SceneDelegate.swift`:
-
-   ```swift
-   import GoogleSignIn
-
-   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-     for context in URLContexts where GIDSignIn.sharedInstance.handle(context.url) {
-       return
-     }
-     RCTLinkingManager.scene(scene, openURLContexts: URLContexts)
-   }
-   ```
-
-3. Without `use_frameworks!`, enable modular headers in the Podfile app target:
-
-   ```ruby
-   pod 'GoogleUtilities', :modular_headers => true
-   pod 'RecaptchaInterop', :modular_headers => true
-   ```
-
-For the Swift Package Manager track, set `$GoogleAuthUseSPM = true` and `use_frameworks! :linkage => :dynamic` in the Podfile. The app target then can't `import GoogleSignIn`, so forward the URL through the Objective-C runtime:
+2. Set `use_frameworks! :linkage => :dynamic` in the Podfile.
+3. Forward opened URLs to Google Sign-In. The app target can't `import GoogleSignIn`, so go through the Objective-C runtime:
 
 ```swift
 func handleGoogleSignInURL(_ url: URL) -> Bool {
@@ -126,28 +100,24 @@ func handleGoogleSignInURL(_ url: URL) -> Bool {
 }
 ```
 
-### Podfile notes for React Native Firebase 26
+Then call it from `SceneDelegate.swift`:
 
-With static frameworks, React Native Firebase 26 stops `pod install` until its SPM mode is off:
-
-```ruby
-$RNFirebaseDisableSPM = true
+```swift
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+  for context in URLContexts where handleGoogleSignInURL(context.url) {
+    return
+  }
+  RCTLinkingManager.scene(scene, openURLContexts: URLContexts)
+}
 ```
 
-Xcode 27 rejects pod targets below iOS 15, which the Firebase CocoaPods resource bundles still use. Raise them in `post_install`:
+## Upgrading to 0.5
 
-```ruby
-post_install do |installer|
-  # react_native_post_install(...)
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < min_ios_version_supported.to_f
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
-      end
-    end
-  end
-end
-```
+0.5 drops the GoogleSignIn CocoaPod.
+
+- Expo: remove `iosUseSwiftPackageManager` from the plugin options and set `useFrameworks: "dynamic"` through `expo-build-properties`.
+- Bare React Native: remove `$GoogleAuthUseSPM` and the `GoogleUtilities` / `RecaptchaInterop` modular-header pods from the Podfile, and use the URL forwarder above.
+- React Native Firebase: upgrade to 27.
 
 ## API
 

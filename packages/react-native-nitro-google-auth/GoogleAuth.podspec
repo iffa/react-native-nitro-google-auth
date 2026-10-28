@@ -1,5 +1,4 @@
 require "json"
-require File.expand_path("google_auth_spm", __dir__)
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
@@ -28,6 +27,10 @@ Pod::Spec.new do |s|
 
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
-  google_auth_sign_in_dependency(s)
+  # First release that accepts AppCheckCore 12, which Firebase 13 requires.
+  spm_dependency(s,
+                 url: 'https://github.com/google/GoogleSignIn-iOS.git',
+                 requirement: { kind: 'upToNextMajorVersion', minimumVersion: '10.1.0' },
+                 products: ['GoogleSignIn'])
   install_modules_dependencies(s)
 end
